@@ -10,7 +10,8 @@ app.set('trust proxy', 1);
 
 // CORS middleware for production
 app.use((req, res, next) => {
-  res.header('Access-Control-Allow-Origin', process.env.FRONTEND_URL || '*');
+  const allowedOrigin = process.env.FRONTEND_URL || '*';
+  res.header('Access-Control-Allow-Origin', allowedOrigin);
   res.header('Access-Control-Allow-Methods', 'GET, POST, PUT, PATCH, DELETE, OPTIONS');
   res.header('Access-Control-Allow-Headers', 'Origin, X-Requested-With, Content-Type, Accept, Authorization');
   
@@ -51,8 +52,8 @@ app.get('/', (req, res) => {
 const userRoutes = require('./routes/user.routes');
 app.use('/api/users', userRoutes);
 
-// 404 handler
-app.use('*', (req, res) => {
+// 404 handler - Express 4.x compatible
+app.get('*', (req, res) => {
   res.status(404).json({
     error: 'Route not found',
     message: `Cannot ${req.method} ${req.originalUrl}`
