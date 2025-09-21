@@ -12,10 +12,12 @@ const pool = new Pool({
   ssl: {
     rejectUnauthorized: false
   },
-  // Connection pool settings for production
+  // Connection pool settings - increased timeouts for cloud databases
   max: 20,
   idleTimeoutMillis: 30000,
-  connectionTimeoutMillis: 2000,
+  connectionTimeoutMillis: 10000, // Changed from 2000 to 10000ms
+  keepAlive: true,
+  keepAliveInitialDelayMillis: 0,
 });
 
 // Test connection on startup
