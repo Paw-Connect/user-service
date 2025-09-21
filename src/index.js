@@ -8,12 +8,25 @@ const PORT = process.env.PORT || 3001;
 // Trust proxy for Render
 app.set('trust proxy', 1);
 
-// CORS middleware for production
+// CORS middleware for both development and production
 app.use((req, res, next) => {
-  const allowedOrigin = process.env.FRONTEND_URL || '*';
-  res.header('Access-Control-Allow-Origin', allowedOrigin);
+  // Allow multiple origins for development and production
+  const allowedOrigins = [
+    'http://localhost:3000',
+    'http://localhost:5173', // Vite default port
+    'https://your-frontend-domain.com',
+    process.env.FRONTEND_URL
+  ].filter(Boolean); // Remove undefined values
+
+  const origin = req.headers.origin;
+  
+  if (allowedOrigins.includes(origin) || process.env.NODE_ENV === 'development') {
+    res.header('Access-Control-Allow-Origin', origin || '*');
+  }
+  
   res.header('Access-Control-Allow-Methods', 'GET, POST, PUT, PATCH, DELETE, OPTIONS');
   res.header('Access-Control-Allow-Headers', 'Origin, X-Requested-With, Content-Type, Accept, Authorization');
+  res.header('Access-Control-Allow-Credentials', 'true');
   
   if (req.method === 'OPTIONS') {
     res.sendStatus(200);

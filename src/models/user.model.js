@@ -34,6 +34,16 @@ User.findByEmail = async (email) => {
   }
 };
 
+User.findById = async (id) => {
+  const query = 'SELECT * FROM users WHERE id = $1';
+  try {
+    const res = await db.query(query, [id]);
+    return res.rows[0]; // Returns the user object or undefined if not found
+  } catch (err) {
+    throw err;
+  }
+};
+
 User.updateSkills = async (userId, skills) => {
   const query = 'UPDATE users SET skills = $1, updated_at = now() WHERE id = $2 RETURNING id, name, email, skills';
   try {

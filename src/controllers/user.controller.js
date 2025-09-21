@@ -51,37 +51,66 @@ exports.getProfilesForMatching = async (req, res) => {
 
 // MOCK ENDPOINT FOR R (Task Service)
 exports.getUserById = async (req, res) => {
-  const { userId } = req.params;
-  console.log(`Serving mock profile for userId: ${userId}`);
-  const mockUser = {
-      userId: userId,
-      name: "Mock Volunteer",
-      email: "mock@volunteer.org",
-      phone: "555-555-5555"
-  };
-  res.status(200).json(mockUser);
+  try {
+    const { userId } = req.params;
+    console.log(`Fetching user profile for userId: ${userId}`);
+    
+    // Get user from database
+    const user = await User.findById(userId);
+    if (!user) {
+      return res.status(404).json({ message: 'User not found.' });
+    }
+
+    // Return user data (excluding password hash)
+    const userProfile = {
+      id: user.id,
+      name: user.name,
+      email: user.email,
+      phone: user.phone,
+      roles: user.roles || ['volunteer'],
+      skills: user.skills || [],
+      points: user.points || 0,
+      badges: user.badges || [],
+      created_at: user.created_at,
+      updated_at: user.updated_at
+    };
+
+    console.log('User profile found:', userProfile);
+    res.status(200).json(userProfile);
+    
+  } catch (err) {
+    console.error('Error fetching user profile:', err);
+    res.status(500).json({ message: 'Server error fetching user profile.' });
+  }
 };
 
 exports.loginUser = async (req, res) => {
   try {
+    console.log('Login attempt for:', req.body.email);
     const { email, password } = req.body;
     if (!email || !password) {
+      console.log('Missing email or password');
       return res.status(400).json({ message: 'Please provide email and password.' });
     }
 
     // 1. Find the user by email
+    console.log('Looking for user with email:', email);
     const user = await User.findByEmail(email);
     if (!user) {
+      console.log('User not found with email:', email);
       // Use a generic error message for security
       return res.status(401).json({ message: 'Invalid credentials.' });
     }
 
+    console.log('User found:', user.id);
     // 2. Compare the provided password with the stored hash
     const isMatch = await bcrypt.compare(password, user.password_hash);
     if (!isMatch) {
+      console.log('Password mismatch for user:', email);
       return res.status(401).json({ message: 'Invalid credentials.' });
     }
 
+    console.log('Login successful for:', email);
     // 3. If credentials are correct, create a JWT
     const payload = {
       id: user.id,
@@ -98,7 +127,7 @@ exports.loginUser = async (req, res) => {
     });
 
   } catch (err) {
-    console.error(err);
+    console.error('Login error:', err);
     res.status(500).json({ message: 'Server error during login.' });
   }
 };

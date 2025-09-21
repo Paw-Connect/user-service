@@ -15,7 +15,8 @@ const pool = new Pool({
   // Connection pool settings - increased timeouts for cloud databases
   max: 20,
   idleTimeoutMillis: 30000,
-  connectionTimeoutMillis: 10000, // Changed from 2000 to 10000ms
+  connectionTimeoutMillis: 20000, // Increased from 10000 to 20000ms
+  acquireTimeoutMillis: 60000,   // Added acquire timeout
   keepAlive: true,
   keepAliveInitialDelayMillis: 0,
 });
